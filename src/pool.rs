@@ -63,56 +63,56 @@ impl PoolSearch {
         if let Some(ref value) = self.name_matches {
             params.push('&');
             params.push_str(&urlencoding::encode("search[name_matches]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(&value));
         }
 
         if let Some(ref value) = self.id {
             params.push('&');
             params.push_str(&urlencoding::encode("search[id]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(&value.iter().join(",")));
         }
 
         if let Some(ref value) = self.description_matches {
             params.push('&');
             params.push_str(&urlencoding::encode("search[description_matches]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(&value));
         }
 
         if let Some(ref value) = self.creator_name {
             params.push('&');
             params.push_str(&urlencoding::encode("search[creator_name]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(&value));
         }
 
         if let Some(ref value) = self.creator_id {
             params.push('&');
             params.push_str(&urlencoding::encode("search[creator_id]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(&value.to_string()));
         }
 
         if let Some(ref value) = self.is_active {
             params.push('&');
             params.push_str(&urlencoding::encode("search[is_active]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(&value.to_string()));
         }
 
         if let Some(ref value) = self.is_deleted {
             params.push('&');
             params.push_str(&urlencoding::encode("search[is_deleted]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(&value.to_string()));
         }
 
         if let Some(ref value) = self.category {
             params.push('&');
             params.push_str(&urlencoding::encode("search[category]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(match value {
                 PoolCategory::Series => "series",
                 PoolCategory::Collection => "collection",
@@ -122,7 +122,7 @@ impl PoolSearch {
         if let Some(ref value) = self.order {
             params.push('&');
             params.push_str(&urlencoding::encode("search[order]"));
-            params.push_str("=");
+            params.push('=');
             params.push_str(&urlencoding::encode(match value {
                 PoolSearchOrder::Name => "name",
                 PoolSearchOrder::CreatedAt => "created_at",
@@ -244,7 +244,7 @@ impl<'a> Stream for PoolStream<'a> {
                                 this.chunk =
                                     match serde_json::from_value::<PoolSearchApiResponse>(body) {
                                         Ok(res) => {
-                                            res.into_iter().rev().map(|pool| Ok(pool)).collect()
+                                            res.into_iter().rev().map(Ok).collect()
                                         }
                                         Err(e) => vec![Err(e.into())],
                                     };
@@ -326,7 +326,7 @@ impl Client {
     /// }
     /// # Ok(()) }
     /// ```
-    pub fn pool_search<'a>(&'a self, search: PoolSearch) -> PoolStream<'a> {
+    pub fn pool_search(&self, search: PoolSearch) -> PoolStream {
         PoolStream::new(self, search)
     }
 }
@@ -345,7 +345,7 @@ mod tests {
         )
         .unwrap()
         .into_iter()
-        .map(|x| Ok(x))
+        .map(Ok)
         .collect();
 
         let _m = [
