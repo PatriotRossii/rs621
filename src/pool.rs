@@ -243,9 +243,7 @@ impl<'a> Stream for PoolStream<'a> {
                                 // put everything in the chunk
                                 this.chunk =
                                     match serde_json::from_value::<PoolSearchApiResponse>(body) {
-                                        Ok(res) => {
-                                            res.into_iter().rev().map(Ok).collect()
-                                        }
+                                        Ok(res) => res.into_iter().rev().map(Ok).collect(),
                                         Err(e) => vec![Err(e.into())],
                                     };
 
