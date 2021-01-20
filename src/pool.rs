@@ -57,78 +57,66 @@ pub struct PoolSearch {
 }
 
 impl PoolSearch {
+    fn add_parameter(&self, params: &mut String, name: &str, value: &str) {
+        params.push('&');
+        params.push_str(&urlencoding::encode(name));
+        params.push('=');
+        params.push_str(&urlencoding::encode(value))
+    }
+
     fn to_search_parameters(&self) -> String {
         let mut params = String::new();
 
         if let Some(ref value) = self.name_matches {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[name_matches]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(&value));
+            self.add_parameter(&mut params, "search[name_matches]", &value);
         }
 
         if let Some(ref value) = self.id {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[id]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(&value.iter().join(",")));
+            self.add_parameter(&mut params, "search[id]", &value.iter().join(","));
         }
 
         if let Some(ref value) = self.description_matches {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[description_matches]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(&value));
+            self.add_parameter(&mut params, "search[description_matches]", &value);
         }
 
         if let Some(ref value) = self.creator_name {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[creator_name]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(&value));
+            self.add_parameter(&mut params, "search[creator_name]", &value);
         }
 
         if let Some(ref value) = self.creator_id {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[creator_id]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(&value.to_string()));
+            self.add_parameter(&mut params, "search[creator_id]", &value.to_string());
         }
 
         if let Some(ref value) = self.is_active {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[is_active]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(&value.to_string()));
+            self.add_parameter(&mut params, "search[is_active]", &value.to_string());
         }
 
         if let Some(ref value) = self.is_deleted {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[is_deleted]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(&value.to_string()));
+            self.add_parameter(&mut params, "search[is_deleted]", &value.to_string());
         }
 
         if let Some(ref value) = self.category {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[category]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(match value {
-                PoolCategory::Series => "series",
-                PoolCategory::Collection => "collection",
-            }));
+            self.add_parameter(
+                &mut params,
+                "search[category]",
+                match value {
+                    PoolCategory::Series => "series",
+                    PoolCategory::Collection => "collection",
+                },
+            );
         }
 
         if let Some(ref value) = self.order {
-            params.push('&');
-            params.push_str(&urlencoding::encode("search[order]"));
-            params.push_str("=");
-            params.push_str(&urlencoding::encode(match value {
-                PoolSearchOrder::Name => "name",
-                PoolSearchOrder::CreatedAt => "created_at",
-                PoolSearchOrder::UpdatedAt => "updated_at",
-                PoolSearchOrder::PostCount => "post_count",
-            }));
+            self.add_parameter(
+                &mut params,
+                "search[order]",
+                match value {
+                    PoolSearchOrder::Name => "name",
+                    PoolSearchOrder::CreatedAt => "created_at",
+                    PoolSearchOrder::UpdatedAt => "updated_at",
+                    PoolSearchOrder::PostCount => "post_count",
+                },
+            );
         }
 
         params
