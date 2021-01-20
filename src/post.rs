@@ -247,7 +247,7 @@ impl PostSample {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["has", "width", "height", "url"];
+        const FIELDS: &[&str] = &["has", "width", "height", "url"];
         de.deserialize_struct("PostSample", FIELDS, PostSampleVisitor)
     }
 }
@@ -303,7 +303,7 @@ pub struct PostSearchStream<'a> {
 impl<'a> PostSearchStream<'a> {
     fn new<T: Into<Query>>(client: &'a Client, query: T, page: SearchPage) -> Self {
         PostSearchStream {
-            client: client,
+            client,
             query: query.into(),
 
             query_url: None,
@@ -341,12 +341,7 @@ impl<'a> Stream for PostSearchStream<'a> {
                                 // put everything in the chunk
                                 this.chunk =
                                     match serde_json::from_value::<PostListApiResponse>(body) {
-                                        Ok(res) => res
-                                            .posts
-                                            .into_iter()
-                                            .rev()
-                                            .map(|post| Ok(post))
-                                            .collect(),
+                                        Ok(res) => res.posts.into_iter().rev().map(Ok).collect(),
                                         Err(e) => vec![Err(e.into())],
                                     };
 
@@ -495,12 +490,7 @@ where
                                 // put everything in the chunk
                                 this.chunk =
                                     match serde_json::from_value::<PostListApiResponse>(body) {
-                                        Ok(res) => res
-                                            .posts
-                                            .into_iter()
-                                            .rev()
-                                            .map(|post| Ok(post))
-                                            .collect(),
+                                        Ok(res) => res.posts.into_iter().rev().map(Ok).collect(),
                                         Err(e) => vec![Err(e.into())],
                                     };
 
@@ -568,7 +558,7 @@ impl Client {
     /// }
     /// # Ok(()) }
     /// ```
-    pub fn get_posts<'a, I, J, T>(&'a self, ids: I) -> PostStream<'a, J, T>
+    pub fn get_posts<I, J, T>(&self, ids: I) -> PostStream<J, T>
     where
         T: Borrow<u64> + Unpin,
         J: Iterator<Item = T> + Unpin,
@@ -594,7 +584,7 @@ impl Client {
     /// }
     /// # Ok(()) }
     /// ```
-    pub fn post_search<'a, T: Into<Query>>(&'a self, tags: T) -> PostSearchStream<'a> {
+    pub fn post_search<T: Into<Query>>(&self, tags: T) -> PostSearchStream {
         self.post_search_from_page(tags, SearchPage::Page(1))
     }
 
@@ -644,11 +634,11 @@ impl Client {
     /// }
     /// # Ok(()) }
     /// ```
-    pub fn post_search_from_page<'a, T: Into<Query>>(
-        &'a self,
+    pub fn post_search_from_page<T: Into<Query>>(
+        &self,
         tags: T,
         page: SearchPage,
-    ) -> PostSearchStream<'a> {
+    ) -> PostSearchStream {
         PostSearchStream::new(self, tags, page)
     }
 }
@@ -689,7 +679,7 @@ mod tests {
             .posts
             .into_iter()
             .take(100)
-            .map(|x| Ok(x))
+            .map(Ok)
             .collect::<Vec<_>>()
         );
     }
@@ -742,7 +732,7 @@ mod tests {
                         .into_iter()
                 )
                 .take(400)
-                .map(|x| Ok(x))
+                .map(Ok)
                 .collect::<Vec<_>>()
         );
     }
@@ -796,7 +786,7 @@ mod tests {
             .into_iter()
             .chain(responses[1].take().unwrap().posts.into_iter())
             .take(400)
-            .map(|x| Ok(x))
+            .map(Ok)
             .collect();
 
         let _m = [

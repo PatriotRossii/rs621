@@ -231,9 +231,7 @@ impl<'a> Stream for PoolStream<'a> {
                                 // put everything in the chunk
                                 this.chunk =
                                     match serde_json::from_value::<PoolSearchApiResponse>(body) {
-                                        Ok(res) => {
-                                            res.into_iter().rev().map(|pool| Ok(pool)).collect()
-                                        }
+                                        Ok(res) => res.into_iter().rev().map(Ok).collect(),
                                         Err(e) => vec![Err(e.into())],
                                     };
 
@@ -314,7 +312,7 @@ impl Client {
     /// }
     /// # Ok(()) }
     /// ```
-    pub fn pool_search<'a>(&'a self, search: PoolSearch) -> PoolStream<'a> {
+    pub fn pool_search(&self, search: PoolSearch) -> PoolStream {
         PoolStream::new(self, search)
     }
 }
@@ -333,7 +331,7 @@ mod tests {
         )
         .unwrap()
         .into_iter()
-        .map(|x| Ok(x))
+        .map(Ok)
         .collect();
 
         let _m = [
